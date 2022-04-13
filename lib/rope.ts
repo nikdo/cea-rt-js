@@ -75,7 +75,7 @@ export class RopeBranch implements IRope {
   height(): number {
     return 1 + Math.max(this.leftHeight(), this.rightHeight())
   }
-  
+
   // Please note that this is defined differently from "weight" in the Wikipedia article.
   // You may wish to rewrite this method or create a different one.
   size() {
@@ -84,7 +84,7 @@ export class RopeBranch implements IRope {
 
   /*
     Whether the rope is balanced, i.e. whether any subtrees have branches
-    which differ by more than one in height. 
+    which differ by more than one in height.
   */
   isBalanced(): boolean {
     const leftBalanced = this.left ? this.left.isBalanced() : true
@@ -105,7 +105,7 @@ export class RopeBranch implements IRope {
   }
 
   // Helper method which converts the rope into an associative array
-  // 
+  //
   // Only used for debugging, this has no functional purpose
   toMap(): MapBranch {
     const mapVersion: MapBranch = {
@@ -135,12 +135,26 @@ export function createRopeFromMap(map: MapRepresentation): IRope {
   return new RopeBranch(left, right);
 }
 
-// This is an internal API. You can implement it however you want. 
-// (E.g. you can choose to mutate the input rope or not)
-function splitAt(rope: IRope, position: number): { left: IRope, right: IRope } {
-  // TODO
+export function concat(left: IRope, right: IRope): IRope {
+  return new RopeBranch(left, right);
 }
 
+
+// position = 0-based index; part of the left rope
+export function splitAt(rope: IRope, position: number): { left: IRope, right: IRope } {
+  if (rope.height() == 1) {
+    const text = rope.toString();
+    if (position >= text.length) throw new Error("position is outside of the string")
+    return {
+      left: new RopeLeaf(text.substring(0, position + 1)),
+      right: new RopeLeaf(text.substring(position + 1, text.length))
+    }
+  }
+  else throw new Error("branches not supported");
+}
+
+// start = 0-based index; included in deletion
+// end = 0-based index; excluded from deletion
 export function deleteRange(rope: IRope, start: number, end: number): IRope {
   // TODO
 }
