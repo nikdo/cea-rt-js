@@ -94,6 +94,14 @@ export class RopeBranch implements IRope {
       && Math.abs(this.leftHeight() - this.rightHeight()) < 2
   }
 
+  getLeft(): IRope {
+    return this.left;
+  }
+
+  getRight(): IRope {
+    return this.right;
+  }
+
   leftHeight(): number {
     if (!this.left) return 0
     return this.left.height()
@@ -139,28 +147,50 @@ export function concat(left: IRope, right: IRope): IRope {
   return new RopeBranch(left, right);
 }
 
+function isLeaf(rope: IRope) {
+  return rope.height() == 1
+}
 
 // position = 0-based index; part of the left rope
 export function splitAt(rope: IRope, position: number): { left: IRope, right: IRope } {
-  if (rope.height() == 1) {
+  if (isLeaf(rope)) {
     const text = rope.toString();
-    if (position >= text.length) throw new Error("position is outside of the string")
+    if (position >= text.length - 1) throw new Error("position not within the string")
     return {
       left: new RopeLeaf(text.substring(0, position + 1)),
       right: new RopeLeaf(text.substring(position + 1, text.length))
     }
   }
-  else throw new Error("branches not supported");
+  else {
+    const branch = rope as RopeBranch;
+    if (position >= branch.size()) {
+      return {
+        left: branch;
+        right: undefined;
+      }
+    } else {
+      // TODO: is this OK to fetch like this?
+      const left = branch.getLeft();
+      const right = branch.getRight();
+      return {
+        // TODO... :/
+        left: position >= left.size ? branch : splitAt(branch, position).left,
+        right: position >= right.size ? branch : splitAt(branch, position)
+      }
+  };
 }
 
 // start = 0-based index; included in deletion
 // end = 0-based index; excluded from deletion
 export function deleteRange(rope: IRope, start: number, end: number): IRope {
-  // TODO
+  const left = splitAt(rope, start).left;
+  const right = splitAt(rope, end).right;
+  return concat(left, right);
 }
 
 export function insert(rope: IRope, text: string, location: number): IRope {
-  // TODO
+  const pair = splitAt(rope, location);
+  return concat(concat(pair.left, text), pair.right);
 }
 
 export function rebalance(rope: IRope): IRope {

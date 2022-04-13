@@ -76,6 +76,35 @@ describe("splitAt", () => {
     expect(pair.left.toString()).toEqual('tes');
     expect(pair.right.toString()).toEqual('t');
   })
+  test("split branch", () => {
+    const rope = createRopeFromMap({
+      kind: 'branch',
+      left: {
+        kind: 'leaf',
+        text: 'hi_'
+      },
+      right: {
+        kind: 'leaf',
+        text: 'there'
+      }
+    });
+    const left = createRopeFromMap({
+      kind: 'branch',
+      left: {
+        kind: 'leaf',
+        text: 'hi_'
+      }
+    });
+    const right = createRopeFromMap({
+      kind: 'branch',
+      left: {
+        kind: 'leaf',
+        text: 'there'
+      }
+    });
+    const pair = splitAt(rope, 1);
+    expect(pair.left.toMap()).toEqual(createRopeFromMap(left));
+  })
 })
 
 describe.skip("insertion", () => {
